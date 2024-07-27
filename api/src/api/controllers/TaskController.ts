@@ -1,12 +1,13 @@
 import {
-    Authorized, Body, Get, JsonController, Post, QueryParam, Req
+    Authorized, Body, Get, HttpCode, JsonController, OnUndefined, Param, Patch, Post, QueryParam, Req
 } from 'routing-controllers';
 import { ResponseSchema } from 'routing-controllers-openapi';
 
 import { TaskService } from '../../database/services/TaskService';
-import { PaginatedTask, Task, TaskCreateDetails } from '../../schema/Task';
+import { PaginatedTask, Task, TaskCreateDetails, TaskUpdateDetails, TaskWithoutContent } from '../../schema/Task';
 import { Task as TaskModel } from '../../database/models/Task';
 import { plainToClass } from 'class-transformer';
+import { TaskNotFoundError } from '../errors/TaskNotFoundError';
 
 
 @Authorized()
@@ -28,11 +29,15 @@ export class UserController {
          */
         const userId = req.user.id
         const { tasks, total } = await this.taskService.findAllByUserId(userId, page, size);
-        return new PaginatedTask(tasks, size, page, total)
+        return new PaginatedTask(tasks.map((task) => {
+            delete task.content
+            return plainToClass(TaskWithoutContent, task);
+        }), size, page, total)
     }
 
     @Post("/")
     @ResponseSchema(Task)
+    @HttpCode(201)
     public async createTask(
         @Req() req: any,
         @Body() body: TaskCreateDetails
@@ -44,5 +49,22 @@ export class UserController {
         newTask.user_id = req.user.id
         const createdTaskModel = await this.taskService.create(newTask);
         return plainToClass(Task, createdTaskModel);
+    }
+
+    @Patch("/:task_id")
+    @HttpCode(204)
+    @OnUndefined(204)
+    public async updateTask(@Param('task_id') id: string, @Body() body: TaskUpdateDetails): Promise<undefined> {
+        return this.taskService.update(id, body);
+    }
+
+    @Get("/:task_id")
+    @ResponseSchema(Task)
+    @OnUndefined(TaskNotFoundError)
+    public async getTask(@Param('task_id') id: string): Promise<Task | undefined> {
+        const task = this.taskService.findById(id)
+        if (!task) return task;
+
+        return plainToClass(Task, task);
     }
 }

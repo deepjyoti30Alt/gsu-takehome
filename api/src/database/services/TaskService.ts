@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { EntityRepository, Repository } from 'typeorm';
 import { Task } from '../models/Task';
+import { TaskNotFoundError } from '../../api/errors/TaskNotFoundError';
 
 @EntityRepository(Task)
 export class TaskRepository extends Repository<Task> {
@@ -34,7 +35,7 @@ export class TaskService {
         return newUser;
     }
 
-    public async update(id: string, updateData: Partial<Task>): Promise<Task | undefined> {
+    public async update(id: string, updateData: Partial<Task>): Promise<undefined> {
         /**
          * Update the task based on the passed details.
          * 
@@ -42,11 +43,11 @@ export class TaskService {
          */
         const task = await this.findById(id);
         if (!task) {
-            return undefined;
+            throw new TaskNotFoundError;
         }
 
         Object.assign(task, updateData);
-        return this.taskRepository.save(task);
+        await this.taskRepository.save(task);
     }
 
     public async delete(id: string): Promise<void> {
