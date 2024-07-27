@@ -11,7 +11,6 @@ const Navbar = ({}) => {
       });
 
       const pathname = usePathname();
-      console.log(pathname);
 
     return pathname === '/authenticate' ? null : (
         <div className="navbar--wrapper w-full border-b">

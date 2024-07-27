@@ -1,14 +1,12 @@
-import type { Metadata } from "next";
+'use client'
+
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/common/Navbar";
+import StoreProvider from "./providers/StoreProvider";
+import { AuthCheck } from "./components/HOC/AuthCheck";
 
 const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Tasks App",
-  description: "A simple tasks app",
-};
 
 export default function RootLayout({
   children,
@@ -18,11 +16,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div>
-          <Navbar />
-          {children}
-        </div>
-      </body>
+        <StoreProvider>
+            <AuthCheck>
+              <div>
+                <Navbar />
+                {children}
+              </div>
+            </AuthCheck>
+        </StoreProvider>
+        </body>
     </html>
   );
 }
