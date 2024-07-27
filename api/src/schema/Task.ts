@@ -1,6 +1,7 @@
 import { IsUUID, IsNotEmpty, IsOptional, IsString, IsEnum } from 'class-validator';
 import { Priority } from '../api/enums/Priority';
 import { Status } from '../api/enums/Status';
+import { Expose, Transform } from 'class-transformer';
 
 export class BaseTaskWithoutContent {
     @IsNotEmpty()
@@ -17,6 +18,8 @@ export class BaseTask extends BaseTaskWithoutContent {
 
 export class TaskCreateDetails extends BaseTask {
     public status: Status | null
+
+    public due_at: Date | null
 }
 
 export class TaskWithoutContent extends BaseTaskWithoutContent {
@@ -25,6 +28,18 @@ export class TaskWithoutContent extends BaseTaskWithoutContent {
 
     @IsNotEmpty()
     public status: Status
+
+    public due_at: Date | null
+
+    @Expose()
+    @Transform(({ obj }) => {
+        const currentDate = new Date();
+        return obj.due_at && obj.due_at < currentDate;
+    })
+    public get is_due(): boolean {
+        if (!this.due_at) return false;
+        return ![Status.SKIPPED, Status.COMPLETED].includes(this.status) && this.due_at < new Date();
+    }
 
     @IsNotEmpty()
     public createdAt: Date

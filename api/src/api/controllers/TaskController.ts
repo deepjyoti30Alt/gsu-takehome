@@ -13,7 +13,7 @@ import { Logger, LoggerInterface } from '../../decorators/Logger';
 
 @Authorized()
 @JsonController('/tasks')
-export class UserController {
+export class TaskController {
     constructor(
         @Logger(__filename) private log: LoggerInterface,
         private taskService: TaskService
@@ -75,7 +75,7 @@ export class UserController {
     ): Promise<Task | undefined> {
         this.log.info("Getting task by id")
         const task = this.taskService.findById(id, req.user.id)
-        if (!task) return task;
+        if (!task) return undefined;
 
         return plainToClass(Task, task);
     }

@@ -44,6 +44,9 @@ export class Task {
     @UpdateDateColumn({ type: 'timestamp' })
     public updatedAt: Date;
 
+    @Column({ name: 'due_at', type: 'timestamp' })
+    public due_at: Date;
+
     // Define the relationship between user and tasks
     @ManyToOne(() => User, user => user.tasks)
     @JoinColumn({ name: 'user_id' })  // This specifies the foreign key column
