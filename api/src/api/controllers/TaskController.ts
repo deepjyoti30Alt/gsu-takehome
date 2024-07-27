@@ -51,6 +51,7 @@ export class TaskController {
         const newTask = plainToClass(TaskModel, body)
         newTask.user_id = req.user.id
         const createdTaskModel = await this.taskService.create(newTask);
+        this.log.debug('Task is created in upstream');
         return plainToClass(Task, createdTaskModel);
     }
 

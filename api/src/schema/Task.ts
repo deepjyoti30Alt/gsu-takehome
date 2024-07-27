@@ -17,8 +17,10 @@ export class BaseTask extends BaseTaskWithoutContent {
 }
 
 export class TaskCreateDetails extends BaseTask {
+    @IsOptional()
     public status: Status | null
 
+    @IsOptional()
     public due_at: Date | null
 }
 
@@ -33,13 +35,10 @@ export class TaskWithoutContent extends BaseTaskWithoutContent {
 
     @Expose()
     @Transform(({ obj }) => {
-        const currentDate = new Date();
-        return obj.due_at && obj.due_at < currentDate;
+        if (!obj.due_at) return false;
+        return ![Status.SKIPPED, Status.COMPLETED].includes(obj.status) && obj.due_at < new Date();
     })
-    public get is_due(): boolean {
-        if (!this.due_at) return false;
-        return ![Status.SKIPPED, Status.COMPLETED].includes(this.status) && this.due_at < new Date();
-    }
+    public is_due: boolean
 
     @IsNotEmpty()
     public createdAt: Date
