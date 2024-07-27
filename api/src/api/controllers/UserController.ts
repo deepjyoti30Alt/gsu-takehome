@@ -5,7 +5,8 @@ import { ResponseSchema } from 'routing-controllers-openapi';
 
 import { User } from '../../database/models/User';
 import { UserService } from '../../database/services/UserService';
-import { UserCreateDetails, UserDetails } from '../../schema/User';
+import { LoginUserDetails, LoginUserInDetails, UserCreateDetails, UserDetails } from '../../schema/User';
+import { plainToClass } from 'class-transformer';
 
 
 @JsonController('/users')
@@ -31,5 +32,12 @@ export class UserController {
         user.password = body.password;
 
         return this.userService.create(user);
+    }
+
+    @Post("/login")
+    @ResponseSchema(LoginUserDetails)
+    public async handleUserLogin(@Body() body: LoginUserInDetails): Promise<LoginUserDetails> {
+        const user = await this.userService.validateCredentials(body.email, body.password);
+        return plainToClass(LoginUserDetails, { id: user.id });
     }
 }

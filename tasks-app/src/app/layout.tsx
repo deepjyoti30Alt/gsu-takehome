@@ -5,6 +5,7 @@ import "./globals.css";
 import Navbar from "./components/common/Navbar";
 import StoreProvider from "./providers/StoreProvider";
 import { AuthCheck } from "./components/HOC/AuthCheck";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,6 +22,7 @@ export default function RootLayout({
               <div>
                 <Navbar />
                 {children}
+                <Toaster richColors />
               </div>
             </AuthCheck>
         </StoreProvider>

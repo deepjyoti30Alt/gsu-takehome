@@ -1,15 +1,34 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '../store'
 
-interface AuthData {
+export interface AuthData {
     userId: string | null
     password: string | null
 }
 
-const initialState: AuthData = {
-    userId: null,
-    password: null,
+const loadFromLocalStorage = (): AuthData => {
+    try {
+        const serializedState = localStorage.getItem('authData')
+        if (serializedState === null) {
+            return { userId: null, password: null }
+        }
+        return JSON.parse(serializedState)
+    } catch (e) {
+        console.error('Could not load from localStorage', e)
+        return { userId: null, password: null }
+    }
 }
+
+const saveToLocalStorage = (state: AuthData) => {
+    try {
+        const serializedState = JSON.stringify(state)
+        localStorage.setItem('authData', serializedState)
+    } catch (e) {
+        console.error('Could not save to localStorage', e)
+    }
+}
+
+const initialState: AuthData = loadFromLocalStorage()
 
 export const authDataSlice = createSlice({
     name: 'authentication-data',
@@ -18,10 +37,12 @@ export const authDataSlice = createSlice({
         setCredentials: (state, action: PayloadAction<AuthData>) => {
             state.userId = action.payload.userId
             state.password = action.payload.password
+            saveToLocalStorage(state)  // Save to localStorage
         },
         clearCredentials: (state) => {
             state.userId = null
             state.password = null
+            saveToLocalStorage(state)  // Save to localStorage
         },
     },
 })

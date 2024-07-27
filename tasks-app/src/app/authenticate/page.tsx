@@ -1,14 +1,23 @@
 'use client'
 import React, { useState } from 'react';
+import { UserSignupDetails } from '../types/user';
+import { toast } from 'sonner';
+import { loginUser } from '../networking/user';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../lib/features/authDataSlice';
+import Spinner from '../components/common/loading/Spinner';
+import { InvalidCredentialsError } from '../lib/errors/UserError';
 
 export default function Home() {
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
+    const [formData, setFormData] = useState<UserSignupDetails>({
+        first_name: '',
+        last_name: '',
         email: '',
         password: ''
     });
     const [showNameFields, setShowNameFields] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
+    const dispatch = useDispatch();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -18,9 +27,39 @@ export default function Home() {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleUserLogin = async () => {
+        /**
+         * Handle logging in the user
+         */
+        // Email and password has to be non empty in order for the login to be attempted.
+        if (!formData.email || !formData.password) {
+            toast.error('Email and password is required!')
+            return;
+        }
+
+        try {
+            const authData = await loginUser({ email: formData.email, password: formData.password });
+            dispatch(setCredentials(authData))
+            window.location.href = "/"
+        } catch (err: any) {
+            if (err instanceof InvalidCredentialsError) {
+                toast.error("Invalid Credentials passed")
+            } else {
+                toast.error("Something went wrong, please try again")
+            }
+        }
+    }
+
+    const handleUserSignup = async () => {}
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
+
+        if (isLoading) return;
+
+        setIsLoading(true);
+        await (!showNameFields ? handleUserLogin : handleUserSignup)();
+        setIsLoading(false);
     };
 
     const toggleNameFields = () => {
@@ -39,11 +78,11 @@ export default function Home() {
                                     <label htmlFor="firstName">First Name</label>
                                     <input
                                         id="firstName"
-                                        name="firstName"
+                                        name="first_name"
                                         className="mt-1 w-full border rounded-lg focus:border-blue-600 px-4 py-2 outline-none"
                                         type="text"
                                         placeholder="John"
-                                        value={formData.firstName}
+                                        value={formData.first_name}
                                         onChange={handleInputChange}
                                     />
                                 </div>
@@ -51,11 +90,11 @@ export default function Home() {
                                     <label htmlFor="lastName">Last Name</label>
                                     <input
                                         id="lastName"
-                                        name="lastName"
+                                        name="last_name"
                                         className="mt-1 w-full border rounded-lg focus:border-blue-600 px-4 py-2 outline-none"
                                         type="text"
                                         placeholder="Doe"
-                                        value={formData.lastName}
+                                        value={formData.last_name}
                                         onChange={handleInputChange}
                                     />
                                 </div>
@@ -97,9 +136,10 @@ export default function Home() {
                     </button>
                     <button
                         type="submit"
-                        className="mt-4 bg-blue-800 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        className="mt-4 bg-blue-800 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex justify-center"
                     >
-                        {showNameFields ? 'Create Account' : 'Login'}
+                        {!isLoading && (showNameFields ? 'Create Account' : 'Login')}
+                        {isLoading && (<div className='flex items-center gap-2'><Spinner /> Processing...</div>)}
                     </button>
                 </div>
             </form>

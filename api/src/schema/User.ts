@@ -21,3 +21,16 @@ export class UserCreateDetails extends BaseUser {
     @IsNotEmpty()
     public password: string;
 }
+
+export class LoginUserInDetails {
+    @IsNotEmpty()
+    public email: string
+
+    @IsNotEmpty()
+    public password: string
+}
+
+export class LoginUserDetails {
+    @IsNotEmpty()
+    public id: string;
+}
