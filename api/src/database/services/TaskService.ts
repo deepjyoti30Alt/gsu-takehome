@@ -18,10 +18,11 @@ export class TaskService {
         @OrmRepository() private taskRepository: TaskRepository,
     ) { }
 
-    public findById(id: string): Promise<Task | undefined> {
+    public findById(id: string, userId: string): Promise<Task | undefined> {
         return this.taskRepository.findOne({
             where: {
                 task_id: id,
+                user_id: userId
             }
         });
     }
@@ -35,13 +36,13 @@ export class TaskService {
         return newUser;
     }
 
-    public async update(id: string, updateData: Partial<Task>): Promise<undefined> {
+    public async update(id: string, userId: string, updateData: Partial<Task>): Promise<undefined> {
         /**
          * Update the task based on the passed details.
          * 
          * This will support partial updates (ie: PATCH)
          */
-        const task = await this.findById(id);
+        const task = await this.findById(id, userId);
         if (!task) {
             throw new TaskNotFoundError;
         }
@@ -50,8 +51,11 @@ export class TaskService {
         await this.taskRepository.save(task);
     }
 
-    public async delete(id: string): Promise<void> {
-        await this.taskRepository.delete(id);
+    public async delete(id: string, userId: string): Promise<undefined> {
+        const result = await this.taskRepository.delete({ task_id: id, user_id: userId });
+        if (result.affected === 0) {
+            throw new TaskNotFoundError;
+        }
     }
 
     public async findAllByUserId(userId: string, page: number, size: number): Promise<{ tasks: Task[], total: number }> {
