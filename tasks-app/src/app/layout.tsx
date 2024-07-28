@@ -23,6 +23,7 @@ export default function RootLayout({
                 <Navbar />
                 {children}
                 <Toaster richColors />
+                <div id="modal--container" />
               </div>
             </AuthCheck>
         </StoreProvider>
