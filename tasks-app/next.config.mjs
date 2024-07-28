@@ -7,6 +7,14 @@ const nextConfig = {
         source: "/api/users/:path*",
         destination: `${API_URL}/users/:path*`,
       },
+      {
+        source: "/api/tasks/",
+        destination: `${API_URL}/tasks/`,
+      },
+      {
+        source: "/api/tasks/:path*",
+        destination: `${API_URL}/tasks/:path*`,
+      },
     ];
   },
 };

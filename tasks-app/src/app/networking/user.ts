@@ -2,9 +2,9 @@
  * Handle user related networking functionality.
  */
 
-import { InvalidCredentialsError } from "../lib/errors/UserError";
+import { InvalidCredentialsError, UserNotFoundError } from "../lib/errors/UserError";
 import { AuthData } from "../lib/features/authDataSlice";
-import { UserCredentials } from "../types/user";
+import { UserCredentials, UserSessionDetails } from "../types/user";
 
 export const loginUser = async (details: UserCredentials): Promise<AuthData> => {
     /**
@@ -29,4 +29,21 @@ export const loginUser = async (details: UserCredentials): Promise<AuthData> => 
         userId: id,
         password: details.password
     }
+}
+
+export const getUserDetails = async (authToken: string): Promise<UserSessionDetails> => {
+    /**
+     * Get the details of the logged in user.
+     */
+    const res = await fetch("/api/users/me", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${authToken}`
+        },
+    });
+
+    if (!res.ok) throw new UserNotFoundError;
+
+    return await res.json();
 }
