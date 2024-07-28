@@ -3,7 +3,7 @@
  */
 
 import { TasksFailedToFetchError } from "../lib/errors/TaskError";
-import { Task } from "../types/task";
+import { BaseTask, Task } from "../types/task";
 
 export const getTasks = async (auth: string): Promise<Task[]> => {
     /**
@@ -21,4 +21,20 @@ export const getTasks = async (auth: string): Promise<Task[]> => {
 
     const { tasks } = await res.json()
     return tasks;
+}
+
+export const createTask = async (task: BaseTask, authToken: string): Promise<Task> => {
+    const response = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            "Authorization": `Basic ${authToken}`
+        },
+        body: JSON.stringify(task),
+    })
+    if (!response.ok) {
+        throw new Error('Failed to add task')
+    }
+    const data = await response.json()
+    return data
 }

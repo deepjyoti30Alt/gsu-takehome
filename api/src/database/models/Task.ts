@@ -30,7 +30,7 @@ export class Task {
         type: 'enum',
         enum: Status,
         name: 'status',
-        default: Status.NOT_STARTED
+        default: Status.NOT_STARTED.valueOf()
     })
     public status: Status
 

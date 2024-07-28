@@ -29,6 +29,9 @@ export class TaskWithoutContent extends BaseTaskWithoutContent {
     public task_id: string
 
     @IsNotEmpty()
+    @Transform(({ obj }) => {
+        return obj.status.valueOf()
+    })
     public status: Status
 
     public due_at: Date | null

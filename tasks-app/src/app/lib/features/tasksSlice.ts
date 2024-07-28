@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { RootState } from '../store'
-import { Task } from '@/app/types/task'
-import { getTasks } from '@/app/networking/task'
+import { BaseTaskWithId, Task } from '@/app/types/task'
+import { createTask, getTasks } from '@/app/networking/task'
 
 interface TasksState {
     tasks: Task[]
@@ -22,10 +22,31 @@ export const fetchTasks = createAsyncThunk('tasks/fetchTasks', async (authToken:
     return tasks;
 })
 
+export interface AddTaskPayload {
+    task: BaseTaskWithId,
+    authToken: string
+}
+
+// Async thunk to add a task
+export const addTask = createAsyncThunk<Task, AddTaskPayload>('tasks/addTask', async ({ task, authToken }, { rejectWithValue }) => {
+    try {
+        return await createTask(task, authToken);
+    } catch (err: any) {
+        return rejectWithValue(err.message)
+    }
+})
+
 const tasksSlice = createSlice({
     name: 'tasks',
     initialState,
-    reducers: {},
+    reducers: {
+        addTaskOptimistic: (state, action) => {
+            state.tasks.push(action.payload)
+        },
+        removeTaskOptimistic: (state, action) => {
+            state.tasks = state.tasks.filter(task => task.task_id !== action.payload)
+        },
+    },
     extraReducers: (builder) => {
         builder
             .addCase(fetchTasks.pending, (state) => {
@@ -40,8 +61,28 @@ const tasksSlice = createSlice({
                 state.loading = false
                 state.error = action.error.message || 'Failed to fetch tasks'
             })
+            .addCase(addTask.pending, (state) => {
+                state.loading = true
+                state.error = null
+            })
+            .addCase(addTask.fulfilled, (state, action) => {
+                state.loading = false
+                // Find and update the optimistically added task with the server response
+                const index = state.tasks.findIndex(task => task.task_id === action.meta.arg.task.task_id)
+                if (index !== -1) {
+                    state.tasks[index] = action.payload
+                }
+            })
+            .addCase(addTask.rejected, (state, action) => {
+                state.loading = false
+                state.error = action.payload as string
+                // Rollback the optimistically added task
+                state.tasks = state.tasks.filter(task => task.task_id !== action.meta.arg.task.task_id)
+            })
     },
 })
+
+export const { addTaskOptimistic, removeTaskOptimistic } = tasksSlice.actions
 
 export const selectTasks = (state: RootState) => state.tasks.tasks
 export const selectTasksLoading = (state: RootState) => state.tasks.loading

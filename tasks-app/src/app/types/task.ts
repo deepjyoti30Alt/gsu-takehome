@@ -11,14 +11,21 @@ export enum Status {
     SKIPPED = 'skipped'
 };
 
-export interface Task {
-    task_id: string
+export interface BaseTask {
     title: string
     priority: Priority | null
     status: Status
+    due_at: Date | null
+}
+
+export interface BaseTaskWithId extends BaseTask {
+    task_id: string
+}
+
+export interface Task extends BaseTask {
+    task_id: string
     createdAt: Date
     updatedAt: Date
-    due_at: Date | null
     is_due: boolean
 }
 

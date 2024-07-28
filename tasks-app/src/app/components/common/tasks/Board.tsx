@@ -1,10 +1,16 @@
-import { Status, Task } from "@/app/types/task";
-import React, { useMemo, useState } from "react";
+import { BaseTask, Status, Task } from "@/app/types/task";
+import React, { useCallback, useMemo, useState } from "react";
 import StatusContainer from "./StatusContainer";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plus } from "styled-icons/bootstrap";
 import TaskEditor from "./TaskEditor";
+import { useTasks } from "@/app/lib/hooks/useTasks";
+import { TaskCreateError } from "@/app/lib/errors/TaskError";
+import { toast } from "sonner";
+import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
+import { useDispatch } from "react-redux";
+import { selectBasicAuthCredentials } from "@/app/lib/features/authDataSlice";
 
 interface BoardProps {
     tasks: Task[]
@@ -28,13 +34,29 @@ const Board: React.FC<BoardProps> = ({tasks}) => {
         return statusObj
     }, [tasks])
     const [isEditorOpen, setIsEditorOpen] = useState(false);
+    const { addTask } = useTasks();
+    const authToken = useAppSelector(selectBasicAuthCredentials)
 
     const handleDrop = (oldStatus: Status, newStatus: Status, task_id: string) => {
         console.log(oldStatus, newStatus, task_id);
     }
 
     const onClose = () => setIsEditorOpen(false);
-    const onSave = () => {};
+    const onSave = useCallback((task: BaseTask) => {
+        try {
+            if (!authToken) {
+                throw new Error('Not authenticated');
+            }
+            onClose();
+            addTask(task, authToken);
+        } catch (err) {
+            if (err instanceof TaskCreateError) {
+                toast.error('Failed to create task')
+            } else {
+                toast.error('Something went wrong, please try again')
+            }
+        }
+    }, [authToken, addTask]);
 
     return (
         <div>

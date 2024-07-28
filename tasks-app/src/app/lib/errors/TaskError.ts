@@ -7,3 +7,9 @@ export class TasksFailedToFetchError extends Error {
         super('Failed to fetch tasks');
     }
 }
+
+export class TaskCreateError extends Error {
+    constructor() {
+        super('Failed to create task');
+    }
+}
