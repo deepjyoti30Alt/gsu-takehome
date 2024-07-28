@@ -13,3 +13,9 @@ export class UserNotFoundError extends Error {
         super('User not found')
     }
 }
+
+export class UserSignupError extends Error {
+    constructor() {
+        super('Failed to signup user')
+    }
+}

@@ -8,8 +8,8 @@ export interface UserCredentials {
 }
 
 export interface UserSignupDetails extends UserCredentials {
-    first_name: string
-    last_name: string
+    firstName: string
+    lastName: string
 }
 
 export interface UserSessionDetails {
