@@ -6,7 +6,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Plus } from "styled-icons/bootstrap";
 import TaskEditor from "./TaskEditor";
 import { useTasks } from "@/app/lib/hooks/useTasks";
-import { TaskCreateError } from "@/app/lib/errors/TaskError";
+import { TaskCreateError, TaskUpdateError } from "@/app/lib/errors/TaskError";
 import { toast } from "sonner";
 import { useAppDispatch, useAppSelector } from "@/app/lib/hooks";
 import { useDispatch } from "react-redux";
@@ -34,12 +34,44 @@ const Board: React.FC<BoardProps> = ({tasks}) => {
         return statusObj
     }, [tasks])
     const [isEditorOpen, setIsEditorOpen] = useState(false);
-    const { addTask } = useTasks();
+    const { addTask, updateTask } = useTasks();
     const authToken = useAppSelector(selectBasicAuthCredentials)
 
     const handleDrop = (oldStatus: Status, newStatus: Status, task_id: string) => {
-        console.log(oldStatus, newStatus, task_id);
+        // Find the task that is to be updated.
+        const updatePromise = (async () => {
+            const taskToUpdate = tasks.find((task) => task.task_id === task_id);
+            if (!taskToUpdate) {
+                // Cannot update invalid task
+                throw new Error('Failed to update task status');
+            }
+
+            onTaskUpdate({ ...taskToUpdate, status: newStatus }, taskToUpdate);
+        })()
+
+        console.log(updatePromise);
+
+        toast.promise(updatePromise, {
+            loading: 'Updating the task',
+            success: 'Task updated successfully',
+            error: 'Failed to update task'
+        })
     }
+
+    const onTaskUpdate = useCallback((task: BaseTask, originalTask: Task) => {
+        try {
+            if (!authToken) {
+                throw new Error('Not authenticated');
+            }
+            updateTask(task, authToken, originalTask);
+        } catch (err) {
+            if (err instanceof TaskUpdateError) {
+                toast.error('Failed to create task')
+            } else {
+                toast.error('Something went wrong, please try again')
+            }
+        }
+    }, [authToken])
 
     const onClose = () => setIsEditorOpen(false);
     const onSave = useCallback((task: BaseTask) => {

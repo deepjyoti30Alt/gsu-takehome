@@ -78,11 +78,9 @@ const tasksSlice = createSlice({
         
         builder
             .addCase(addTask.pending, (state) => {
-                state.loading = true
                 state.error = null
             })
             .addCase(addTask.fulfilled, (state, action) => {
-                state.loading = false
                 // Find and update the optimistically added task with the server response
                 const index = state.tasks.findIndex(task => task.task_id === action.meta.arg.task.task_id)
                 if (index !== -1) {
@@ -90,7 +88,6 @@ const tasksSlice = createSlice({
                 }
             })
             .addCase(addTask.rejected, (state, action) => {
-                state.loading = false
                 state.error = action.payload as string
                 // Rollback the optimistically added task
                 state.tasks = state.tasks.filter(task => task.task_id !== action.meta.arg.task.task_id)
@@ -98,7 +95,6 @@ const tasksSlice = createSlice({
         
         builder
             .addCase(updateTask.pending, (state, action) => {
-                state.loading = true;
                 state.error = null;
                 // Optimistically update the task
                 const index = state.tasks.findIndex(t => t.task_id === action.meta.arg.task.task_id);
@@ -112,10 +108,8 @@ const tasksSlice = createSlice({
                 }
             })
             .addCase(updateTask.fulfilled, (state) => {
-                state.loading = false;
             })
             .addCase(updateTask.rejected, (state, action) => {
-                state.loading = false;
                 state.error = action.payload as string || 'Failed to update task';
             })
     },
