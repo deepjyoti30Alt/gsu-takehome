@@ -10,7 +10,6 @@ import { useTasks } from "@/app/lib/hooks/useTasks";
 import { TaskUpdateError } from "@/app/lib/errors/TaskError";
 import { toast } from "sonner";
 import { Check2, X } from "styled-icons/bootstrap";
-import { getColorForStatus } from "@/app/util/statusColors";
 
 interface TaskCardProps {
     task: Task,
@@ -35,6 +34,16 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
     const showIcon = useMemo(() => [Status.COMPLETED, Status.SKIPPED].includes(task.status), [task.status]);
     const isCompleted = useMemo(() => task.status === Status.COMPLETED, [task.status])
     const IconComponent = useMemo(() => isCompleted ? Check2 : X, [isCompleted]);
+    const dueIn = useMemo(() => {
+        if (!task.due_at) return null;
+        const dueAsMoment = moment(task.due_at)
+
+        if (moment().diff(dueAsMoment) > 0) {
+            return dueAsMoment.fromNow();
+        } else {
+            return 'in ' + dueAsMoment.fromNow(true);
+        }
+    }, [task.due_at]);
 
     const onClose = () => setIsEditorOpen(false);
     const onTaskSave = useCallback((updatedTask: BaseTask) => {
@@ -63,6 +72,9 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
                     <div className="task--details--container text-xs">
                         <div className="title--container font-bold text-sm text-neutral-700 text-wrap">{task.title}</div>
                         <div className="created--time mt-1 text-gray-600 font-medium">Created on {createdDate}</div>
+                        {!!dueIn && (<div className={`due--time mt-1 font-medium ${task.is_due ? 'text-red-600' : 'text-blue-600'}`}>
+                        {dueIn}
+                        </div>)}
                     </div>
                 </div>
             </div>

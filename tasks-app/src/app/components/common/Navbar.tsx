@@ -6,6 +6,9 @@ import { AlignTop } from "@styled-icons/bootstrap"
 import { usePathname } from 'next/navigation';
 import { useUser } from '@/app/lib/hooks/useUser';
 import { useMemo } from 'react';
+import { PowerOff } from 'styled-icons/boxicons-regular';
+import { useAppDispatch, useAppSelector } from '@/app/lib/hooks';
+import { clearCredentials } from '@/app/lib/features/authDataSlice';
 
 const Navbar = ({}) => {
     const { user, loading: isLoading, error } = useUser()
@@ -18,6 +21,11 @@ const Navbar = ({}) => {
     }, [user, isLoading, error])
 
     const pathname = usePathname();
+    const dispatch = useAppDispatch()
+
+    const handleLogout = () => {
+        dispatch(clearCredentials());
+    }
 
     return pathname === '/authenticate' ? null : (
         <div className="navbar--wrapper w-full border-b">
@@ -27,7 +35,12 @@ const Navbar = ({}) => {
                 </div>
                 <div className="user--details">
                     {!isLoading && avatar && (
-                        <div className="w-[35px] h-[35px] rounded bg-orange-200" dangerouslySetInnerHTML={{ __html: avatar.toString() }}>
+                        <div className='flex items-center'>
+                            <div className="w-[35px] h-[35px] rounded bg-orange-200" dangerouslySetInnerHTML={{ __html: avatar.toString() }}>
+                            </div>
+                            <button type='button' onClick={handleLogout} className='logout--btn--container ml-2 rounded bg-red-400 p-1'>
+                                <PowerOff size="25px" />
+                            </button>
                         </div>
                     )}
                 </div>
