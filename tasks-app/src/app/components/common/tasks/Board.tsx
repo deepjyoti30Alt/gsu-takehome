@@ -49,8 +49,6 @@ const Board: React.FC<BoardProps> = ({tasks}) => {
             onTaskUpdate({ ...taskToUpdate, status: newStatus }, taskToUpdate);
         })()
 
-        console.log(updatePromise);
-
         toast.promise(updatePromise, {
             loading: 'Updating the task',
             success: 'Task updated successfully',
