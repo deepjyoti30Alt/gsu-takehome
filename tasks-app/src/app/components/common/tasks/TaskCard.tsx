@@ -1,9 +1,15 @@
-import { BaseTask, Task } from "@/app/types/task";
+import { BaseTask, Status, Task } from "@/app/types/task";
 import { getColorForPriority } from "@/app/util/priorityColors";
 import moment from "moment";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import TaskEditor from "./TaskEditor";
+import { useAppSelector } from "@/app/lib/hooks";
+import { selectBasicAuthCredentials } from "@/app/lib/features/authDataSlice";
+import { useTasks } from "@/app/lib/hooks/useTasks";
+import { TaskUpdateError } from "@/app/lib/errors/TaskError";
+import { toast } from "sonner";
+import { Check2, X } from "styled-icons/bootstrap";
 
 interface TaskCardProps {
     task: Task,
@@ -21,22 +27,54 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
     drag(selfRef);
 
     const createdDate = useMemo(() => moment(task.createdAt).format('D MMM'), [task.createdAt]);
-    const colorByPriority = useMemo(() => getColorForPriority(task.priority), [task.priority])
+    const colorByPriority = useMemo(() => getColorForPriority(task.priority, task.status), [task.priority, task.status]);
     const [isEditorOpen, setIsEditorOpen] = useState(false);
+    const authToken = useAppSelector(selectBasicAuthCredentials)
+    const { updateTask } = useTasks()
+    const showIcon = useMemo(() => [Status.COMPLETED, Status.SKIPPED].includes(task.status), [task.status]);
+    const isCompleted = useMemo(() => task.status === Status.COMPLETED, [task.status])
+    const IconComponent = useMemo(() => isCompleted ? Check2 : X, [isCompleted]);
+    const dueIn = useMemo(() => {
+        if (!task.due_at) return null;
+        const dueAsMoment = moment(task.due_at)
+
+        if (moment().diff(dueAsMoment) > 0) {
+            return dueAsMoment.fromNow();
+        } else {
+            return 'in ' + dueAsMoment.fromNow(true);
+        }
+    }, [task.due_at]);
 
     const onClose = () => setIsEditorOpen(false);
-    const onTaskSave = (updatedTask: BaseTask) => {
-        console.log('updated task: ', updatedTask);
-    }
+    const onTaskSave = useCallback((updatedTask: BaseTask) => {
+        try {
+            if (!authToken) {
+                throw new Error('Not authenticated');
+            }
+            onClose();
+            updateTask(updatedTask, authToken, task);
+        } catch (err) {
+            if (err instanceof TaskUpdateError) {
+                toast.error('Failed to update task')
+            } else {
+                toast.error('Something went wrong, please try again')
+            }
+        }
+    }, [task, authToken])
 
     return (
         <div className="task--wrapper">
             <div ref={selfRef} className={`task--card--wrapper rounded border p-2 bg-white cursor-pointer`} onClick={() => setIsEditorOpen(true)}>
                 <div className="top--wrapper flex">
-                    <div className={`checkbox rounded border-[2.5px] w-4 h-4 mt-0.5 mr-2 ${colorByPriority}`}></div>
+                    <div className={`checkbox rounded border-[2.5px] w-4 h-4 mt-0.5 mr-2 p-0 text-black relative ${colorByPriority}`}>
+                        {showIcon && <IconComponent size={isCompleted ? '12px' : '14px'} className={`${isCompleted ? 'top-0' : 'top-[-1px]'} absolute left-0`} />}
+                    </div>
                     <div className="task--details--container text-xs">
                         <div className="title--container font-bold text-sm text-neutral-700 text-wrap">{task.title}</div>
                         <div className="created--time mt-1 text-gray-600 font-medium">Created on {createdDate}</div>
+                        {!!dueIn && (<div className={`due--time mt-1 font-medium ${task.is_due ? 'text-red-600' : 'text-blue-600'}`}>
+                        {dueIn}
+                        </div>)}
                     </div>
                 </div>
             </div>

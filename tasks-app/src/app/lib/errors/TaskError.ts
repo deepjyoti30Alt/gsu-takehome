@@ -13,3 +13,9 @@ export class TaskCreateError extends Error {
         super('Failed to create task');
     }
 }
+
+export class TaskUpdateError extends Error {
+    constructor() {
+        super('Failed to update task');
+    }
+}

@@ -2,16 +2,16 @@
 import React, { useState } from 'react';
 import { UserSignupDetails } from '../types/user';
 import { toast } from 'sonner';
-import { loginUser } from '../networking/user';
+import { loginUser, signupUser } from '../networking/user';
 import { useDispatch } from 'react-redux';
 import { setCredentials } from '../lib/features/authDataSlice';
 import Spinner from '../components/common/loading/Spinner';
-import { InvalidCredentialsError } from '../lib/errors/UserError';
+import { InvalidCredentialsError, UserSignupError } from '../lib/errors/UserError';
 
 export default function Home() {
     const [formData, setFormData] = useState<UserSignupDetails>({
-        first_name: '',
-        last_name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         password: ''
     });
@@ -50,7 +50,18 @@ export default function Home() {
         }
     }
 
-    const handleUserSignup = async () => {}
+    const handleUserSignup = async () => {
+        try {
+            await signupUser(formData);
+            setShowNameFields(false);
+        } catch (err: any) {
+            if (err instanceof UserSignupError) {
+                toast.error('Failed to sign-up user')
+            } else {
+                toast.error('Something went wrong, please try again!')
+            }
+        }
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -78,11 +89,11 @@ export default function Home() {
                                     <label htmlFor="firstName">First Name</label>
                                     <input
                                         id="firstName"
-                                        name="first_name"
+                                        name="firstName"
                                         className="mt-1 w-full border rounded-lg focus:border-blue-600 px-4 py-2 outline-none"
                                         type="text"
                                         placeholder="John"
-                                        value={formData.first_name}
+                                        value={formData.firstName}
                                         onChange={handleInputChange}
                                     />
                                 </div>
@@ -90,11 +101,11 @@ export default function Home() {
                                     <label htmlFor="lastName">Last Name</label>
                                     <input
                                         id="lastName"
-                                        name="last_name"
+                                        name="lastName"
                                         className="mt-1 w-full border rounded-lg focus:border-blue-600 px-4 py-2 outline-none"
                                         type="text"
                                         placeholder="Doe"
-                                        value={formData.last_name}
+                                        value={formData.lastName}
                                         onChange={handleInputChange}
                                     />
                                 </div>

@@ -2,9 +2,26 @@
  * Handle user related networking functionality.
  */
 
-import { InvalidCredentialsError, UserNotFoundError } from "../lib/errors/UserError";
+import { InvalidCredentialsError, UserNotFoundError, UserSignupError } from "../lib/errors/UserError";
 import { AuthData } from "../lib/features/authDataSlice";
-import { UserCredentials, UserSessionDetails } from "../types/user";
+import { UserCredentials, UserSessionDetails, UserSignupDetails } from "../types/user";
+
+export const signupUser = async (details: UserSignupDetails): Promise<void> => {
+    /**
+     * Signup the user
+     */
+    const res = await fetch("/api/users/signup", {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(details)
+    })
+
+    if (!res.ok) throw new UserSignupError;
+
+    return;
+}
 
 export const loginUser = async (details: UserCredentials): Promise<AuthData> => {
     /**
