@@ -36,6 +36,9 @@ RUN bun install
 # Copy the rest of the tasks-app code
 COPY tasks-app ./
 
+# Set the API URL
+ENV NEXT_PUBLIC_API_URL=http://localhost:5001/api
+
 # Build the tasks-app
 RUN bun run build
 

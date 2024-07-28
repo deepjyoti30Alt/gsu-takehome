@@ -10,6 +10,14 @@ The entire app can be run with a single docker command. The env variables need t
 docker build -t gsu-takehome-fullstack .
 ```
 
+Once the image is built, run it with:
+
+```sh
+docker run --env-file=./api/.env.local --env-file=./tasks-app/.env.local -p 3000:3000 gsu-app --name gsu-app
+```
+
+The app will now be available on [http://localhost:3000](http://localhost:3000)
+
 ## API
 
 API is built with express and is part of the `api` directory.
