@@ -38,3 +38,18 @@ export const createTask = async (task: BaseTask, authToken: string): Promise<Tas
     const data = await response.json()
     return data
 }
+
+export const updateTask = async (task: BaseTask, authToken: string, task_id: string): Promise<void> => {
+    const response = await fetch(`/api/tasks/${task_id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Basic ${authToken}`
+        },
+        body: JSON.stringify(task)
+    });
+    if (!response.ok) {
+        throw new Error('Failed to update task')
+    }
+    return
+}

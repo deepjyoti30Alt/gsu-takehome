@@ -1,9 +1,14 @@
 import { BaseTask, Task } from "@/app/types/task";
 import { getColorForPriority } from "@/app/util/priorityColors";
 import moment from "moment";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { useDrag } from "react-dnd";
 import TaskEditor from "./TaskEditor";
+import { useAppSelector } from "@/app/lib/hooks";
+import { selectBasicAuthCredentials } from "@/app/lib/features/authDataSlice";
+import { useTasks } from "@/app/lib/hooks/useTasks";
+import { TaskUpdateError } from "@/app/lib/errors/TaskError";
+import { toast } from "sonner";
 
 interface TaskCardProps {
     task: Task,
@@ -23,11 +28,25 @@ const TaskCard: React.FC<TaskCardProps> = ({ task }) => {
     const createdDate = useMemo(() => moment(task.createdAt).format('D MMM'), [task.createdAt]);
     const colorByPriority = useMemo(() => getColorForPriority(task.priority), [task.priority])
     const [isEditorOpen, setIsEditorOpen] = useState(false);
+    const authToken = useAppSelector(selectBasicAuthCredentials)
+    const { updateTask } = useTasks()
 
     const onClose = () => setIsEditorOpen(false);
-    const onTaskSave = (updatedTask: BaseTask) => {
-        console.log('updated task: ', updatedTask);
-    }
+    const onTaskSave = useCallback((updatedTask: BaseTask) => {
+        try {
+            if (!authToken) {
+                throw new Error('Not authenticated');
+            }
+            onClose();
+            updateTask(updatedTask, authToken, task);
+        } catch (err) {
+            if (err instanceof TaskUpdateError) {
+                toast.error('Failed to update task')
+            } else {
+                toast.error('Something went wrong, please try again')
+            }
+        }
+    }, [task, authToken])
 
     return (
         <div className="task--wrapper">
