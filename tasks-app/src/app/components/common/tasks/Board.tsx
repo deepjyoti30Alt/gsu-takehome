@@ -93,7 +93,7 @@ const Board: React.FC<BoardProps> = ({tasks}) => {
     return (
         <div>
             <DndProvider backend={HTML5Backend}>
-                <div className="2xl:w-4/5 xl:w-11/12 mx-auto min-h-[90vh]">
+                <div className="2xl:w-4/5 w-11/12 mx-auto md:min-h-[90vh] md:pb-0 pb-12">
                     <div className="header mt-6 flex justify-between px-1">
                         <div className="count--container text-xl text-center font-semibold text-neutral-800">
                             {tasksLength} tasks
@@ -105,9 +105,9 @@ const Board: React.FC<BoardProps> = ({tasks}) => {
                             </button>
                         </div>
                     </div>
-                    <div className="status--container mt-6 flex items-center">
+                    <div className="status--container mt-6 flex md:flex-row flex-col items-center">
                         {statusToShow.map((status) => (
-                            <div key={status} className="w-1/4 border-r first:border-l min-h-[85vh] p-3">
+                            <div key={status} className="md:w-1/4 w-full border-r md:first:border-l md:border-l-0 border-l md:min-h-[85vh] p-3">
                                 <div className="header border-b py-2 flex items-center justify-between">
                                     <div className="status--name font-semibold text-neutral-800 capitalize flex items-center">
                                         <div className="status--text">{status.replace("-", " ")}</div>

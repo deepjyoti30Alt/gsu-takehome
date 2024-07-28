@@ -32,7 +32,7 @@ const StatusContainer: React.FC<StatusContainerProps> = ({ status, dropHandlerFn
     drop(selfRef)
 
     return (
-        <div ref={selfRef} className="w-full h-[75vh]">
+        <div ref={selfRef} className="w-full md:h-[75vh]">
             {tasks.map((task) => (
                 <div key={task.task_id} className="mb-2">
                     <TaskCard task={task} />

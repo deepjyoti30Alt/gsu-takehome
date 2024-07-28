@@ -21,7 +21,7 @@ const Navbar = ({}) => {
 
     return pathname === '/authenticate' ? null : (
         <div className="navbar--wrapper w-full border-b">
-            <div className="w-3/4 mx-auto px-4 py-2 flex items-center justify-between">
+            <div className="md:w-3/4 w-11/12 mx-auto px-4 py-2 flex items-center justify-between">
                 <div className='text-blue-600'>
                     <AlignTop size="30px" />
                 </div>
