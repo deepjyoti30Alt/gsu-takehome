@@ -93,13 +93,16 @@ const Board: React.FC<BoardProps> = ({tasks}) => {
             <DndProvider backend={HTML5Backend}>
                 <div className="2xl:w-4/5 w-11/12 mx-auto md:min-h-[90vh] md:pb-0 pb-12">
                     <div className="header mt-6 flex justify-between px-1">
-                        <div className="count--container text-xl text-center font-semibold text-neutral-800">
-                            {tasksLength} tasks
+                        <div className="left--content text-left">
+                            <div className="count--container text-xl font-semibold text-neutral-800">
+                                {tasksLength} tasks
+                            </div>
+                            <div className="md:mt-2 text-gray-500 text-xs font-medium">You can also drag and drop tasks</div>
                         </div>
                         <div className="new--task--btn--wrapper">
-                            <button type="button" className="outline-none bg-none flex items-center py-0.5 pl-1 pr-2 rounded uppercase bg-blue-500 text-white" onClick={() => setIsEditorOpen(true)}>
+                            <button type="button" className="outline-none bg-none flex items-center py-0.5 pl-1 md:pr-2 pr-1 rounded uppercase bg-blue-500 text-white" onClick={() => setIsEditorOpen(true)}>
                                 <Plus size="25px" />
-                                <div className="font-semibold text-sm" >Add</div>
+                                <div className="font-semibold text-sm md:block hidden" >Add</div>
                             </button>
                         </div>
                     </div>

@@ -3,9 +3,14 @@ import Modal from 'react-modal';
 import { X } from "styled-icons/bootstrap";
 import { BaseTask, Priority, Status, Task } from "@/app/types/task";
 import { toast } from "sonner";
+import { useAppSelector } from "@/app/lib/hooks";
+import { selectBasicAuthCredentials } from "@/app/lib/features/authDataSlice";
+import { useTaskDetails } from "@/app/lib/hooks/useTaskById";
+import Spinner from "../loading/Spinner";
 
 interface TaskEditorProps {
     task?: Task,
+    isContentLoading?: boolean,
     heading: string;
     isOpen: boolean;
     onSave: (task: BaseTask) => void;
@@ -24,7 +29,7 @@ const defaultStyles = {
     },
 };
 
-const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose, task}) => {
+const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose, task, isContentLoading = false}) => {
     Modal.setAppElement('#modal--container');
 
     const [taskData, setTaskData] = useState<BaseTask>({
@@ -36,7 +41,18 @@ const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose
     });
 
     const [isMobile, setIsMobile] = useState(false);
-    const customStyles = useMemo(() => ({ content: {...defaultStyles.content, minWidth: isMobile ? '100%' : '500px'} }), [isMobile])
+    const customStyles = useMemo(() => ({ content: {...defaultStyles.content, minWidth: isMobile ? '100%' : '500px'} }), [isMobile]);
+    const isEditing = useMemo(() => !!task?.task_id, [task?.task_id])
+    const authToken = useAppSelector(selectBasicAuthCredentials);
+    const { data: taskExtendedDetails, isLoading, isError } = useTaskDetails(authToken, task?.task_id || '');
+    useEffect(() => {
+        if (!isLoading && !isError && isEditing) {
+            setTaskData(prevData => ({
+                ...prevData,
+                content: taskExtendedDetails?.content || ''
+            }))
+        }
+    }, [isLoading, isError, taskExtendedDetails, isEditing])
 
     useEffect(() => {
         const checkScreenSize = () => {
@@ -97,7 +113,10 @@ const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose
                             />
                         </div>
                         <div className="mb-4">
-                            <label htmlFor="content" className="block text-sm font-medium text-gray-700">Content</label>
+                            <label htmlFor="content" className="block text-sm font-medium text-gray-700 flex items-center gap-1">
+                                <div>Content</div>
+                                {isLoading && isEditing && <div><Spinner /></div>}
+                            </label>
                             <textarea
                                 id="content"
                                 name="content"
@@ -105,6 +124,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose
                                 onChange={handleInputChange}
                                 className="mt-1 block w-full rounded-md px-1 py-1 border text-sm"
                                 placeholder="Description of your task"
+                                disabled={isLoading && isEditing}
                             />
                         </div>
                         <div className="mb-4">

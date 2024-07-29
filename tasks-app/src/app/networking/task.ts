@@ -53,3 +53,17 @@ export const updateTask = async (task: BaseTask, authToken: string, task_id: str
     }
     return
 }
+
+export const getTask = async (authToken: string, task_id: string): Promise<Task> => {
+    /**
+     * Fetch the entire task from upstream and return it based on the passed task_id.
+     */
+    const response = await fetch(`/api/tasks/${task_id}`, {
+        headers: {
+            'Authorization': `Basic ${authToken}`
+        }
+    });
+    if (!response.ok) throw new Error('Failed to get task');
+
+    return await response.json();
+}

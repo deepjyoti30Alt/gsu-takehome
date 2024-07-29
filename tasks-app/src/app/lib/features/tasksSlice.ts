@@ -58,7 +58,7 @@ const tasksSlice = createSlice({
         },
         updateTaskOptimistic: (state, action) => {
             const withoutTaskToUpdate = state.tasks.filter(task => task.task_id !== action.payload.task_id)
-            state.tasks = [ ...withoutTaskToUpdate, action.payload ]
+            state.tasks = [...withoutTaskToUpdate, action.payload]
         }
     },
     extraReducers: (builder) => {
@@ -75,7 +75,7 @@ const tasksSlice = createSlice({
                 state.loading = false
                 state.error = action.error.message || 'Failed to fetch tasks'
             })
-        
+
         builder
             .addCase(addTask.pending, (state) => {
                 state.error = null
@@ -92,7 +92,7 @@ const tasksSlice = createSlice({
                 // Rollback the optimistically added task
                 state.tasks = state.tasks.filter(task => task.task_id !== action.meta.arg.task.task_id)
             })
-        
+
         builder
             .addCase(updateTask.pending, (state, action) => {
                 state.error = null;
