@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Modal from 'react-modal';
 import { X } from "styled-icons/bootstrap";
 import { BaseTask, Priority, Status, Task } from "@/app/types/task";
@@ -12,7 +12,7 @@ interface TaskEditorProps {
     onClose: () => void;
 }
 
-const customStyles = {
+const defaultStyles = {
     content: {
       top: '50%',
       left: '50%',
@@ -21,7 +21,6 @@ const customStyles = {
       marginRight: '-50%',
       transform: 'translate(-50%, -50%)',
       padding: 'none',
-      minWidth: '500px'
     },
 };
 
@@ -34,6 +33,24 @@ const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose
         priority: task?.priority || Priority.MEDIUM,
         status: task?.status || Status.NOT_STARTED
     });
+
+    const [isMobile, setIsMobile] = useState(false);
+    const customStyles = useMemo(() => ({ content: {...defaultStyles.content, minWidth: isMobile ? '100%' : '500px'} }), [isMobile])
+
+    useEffect(() => {
+        const checkScreenSize = () => {
+        setIsMobile(window.innerWidth < 768);
+        };
+
+        // Check on initial render
+        checkScreenSize();
+
+        // Add event listener for window resize
+        window.addEventListener('resize', checkScreenSize);
+
+        // Clean up event listener on component unmount
+        return () => window.removeEventListener('resize', checkScreenSize);
+    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -65,7 +82,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose
                             <X size="25px" />
                         </button>
                     </div>
-                    <div className="modal--content p-8">
+                    <div className="modal--content md:p-8 p-2">
                         <div className="mb-4">
                             <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
                             <input
