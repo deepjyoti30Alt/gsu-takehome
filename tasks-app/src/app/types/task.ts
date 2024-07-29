@@ -16,6 +16,7 @@ export interface BaseTask {
     priority: Priority | null
     status: Status
     due_at: Date | null
+    content: string | null
 }
 
 export interface BaseTaskWithId extends BaseTask {
@@ -27,8 +28,4 @@ export interface Task extends BaseTask {
     createdAt: Date
     updatedAt: Date
     is_due: boolean
-}
-
-export interface TaskWithContent extends Task {
-    content: string | null
 }

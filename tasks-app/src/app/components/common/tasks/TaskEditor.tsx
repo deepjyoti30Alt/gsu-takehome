@@ -29,6 +29,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose
 
     const [taskData, setTaskData] = useState<BaseTask>({
         title: task?.title || '',
+        content: task?.content || '',
         due_at: task?.due_at || null,
         priority: task?.priority || Priority.MEDIUM,
         status: task?.status || Status.NOT_STARTED
@@ -52,7 +53,7 @@ const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose
         return () => window.removeEventListener('resize', checkScreenSize);
     }, []);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setTaskData(prevData => ({
             ...prevData,
@@ -93,6 +94,17 @@ const TaskEditor: React.FC<TaskEditorProps> = ({heading, isOpen, onSave, onClose
                                 onChange={handleInputChange}
                                 className="mt-1 block w-full rounded-md px-1 py-1 border text-sm"
                                 placeholder="Title of your task"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label htmlFor="content" className="block text-sm font-medium text-gray-700">Content</label>
+                            <textarea
+                                id="content"
+                                name="content"
+                                value={taskData.content || ''}
+                                onChange={handleInputChange}
+                                className="mt-1 block w-full rounded-md px-1 py-1 border text-sm"
+                                placeholder="Description of your task"
                             />
                         </div>
                         <div className="mb-4">
