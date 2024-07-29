@@ -13,10 +13,10 @@ docker build -t gsu-takehome-fullstack .
 Once the image is built, run it with:
 
 ```sh
-docker run --env-file=./api/.env.local --env-file=./tasks-app/.env.local -p 3000:3000 gsu-app --name gsu-app
+docker run --env-file=./tasks-app/.env.local -p 3000:3000 gsu-app --name gsu-app
 ```
 
-The app will now be available on [http://localhost:3000](http://localhost:3000)
+The app will now be available at [http://localhost:3000](http://localhost:3000)
 
 ## API
 
